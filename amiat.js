@@ -2,32 +2,43 @@ var status_div;
 var location_div;
 var tip_div;
 var loki;
-function amiatwhere(conference)
+var conference;
+function amiatwhere(whereconference)
 {
-    navigator.geolocation.getCurrentPosition(useBrowser(conference), useLoki(conference));
-
+	conference = whereconference;
+	status_div = document.getElementById('status');
+    location_div = document.getElementById('location');
+    tip_div = document.getElementById('tip');
+	if (navigator.geolocation) {
+	   navigator.geolocation.getCurrentPosition(browserSuccess, browserFailure);
+	}
+	 else {
+	    useLoki(conference);
+	}
+} 
+function browserSuccess(position)
+{
+ 	var lat = position.coords.latitude;
+	var lon = position.coords.longitude;	
+	atWhere(conference,lat,lon,new Date());
+	
+}
+function browserFailure()
+{
+	status_div.innerHTML = "Can't determine your location";
+	tip_div.innerHTML = "Sorry hope you can make it anyway";
+	
 }
 function useLoki(conference)
 {
-    status_div = document.getElementById('status');
-    location_div = document.getElementById('location');
-    tip_div = document.getElementById('tip');
+   
     loki = LokiAPI();
     loki.onSuccess = function(loc) {atWhere(conference,loc.latitude,loc.longitude,new Date());}
     loki.onFailure = function(error,msg) {handleErrors(error,msg)}
     loki.setKey('maploser.com');
     loki.requestLocation(true,loki.NO_STREET_ADDRESS_LOOKUP);
-	
-	
-	
 }
-function useBrowser(conference)
-{
-	var lat = position.coords.latitude;
-  	var lon = position.coords.longitude;	
-	atWhere(conference,lat,lon,new Date());
-	
-}
+
 function handleErrors(error,msg) {
     switch(error) {
         case 1:
@@ -41,7 +52,7 @@ function handleErrors(error,msg) {
         tip_div.innerHTML = "No wifi - going old school";
         break;
         default:
-        tip_div.innerHTML = "Hrm... we had an error determing your geo-geekery. ("+msg+")";
+        tip_div.innerHTML = "Hrm... we had an error determing your #geonerd status. ("+msg+")";
     }	
 }
 function atWhere(conference,lat,lon,date) {
